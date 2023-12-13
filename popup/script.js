@@ -18,8 +18,7 @@ function getData(){
           let urlArray =currentTabUrl.split("/");
           tabUrl = urlArray[2]; //stores Host Name(domain Name)
           let metaDataUrl = "https://" + tabUrl + "/rest/v14/metadata-catalog"; // Meta Data URL to get Metadat
-        //console.log(metaDataUrl);
-    
+          //console.log(metaDataUrl);
           async function openXml(xslUrl, subdomain) {
           await fetch(xslUrl)
             .then(response => {
@@ -55,7 +54,45 @@ function getData(){
               console.error("Problem fetching XSL ID: ", error);
             });
           }
-        
+          async function getCommerceProcess(){
+            selectElement.addEventListener("change",async function(){
+              if (selectElement.value !== ""){
+                destinationCommerceProcess=selectElement.value.split("&")[0];
+                bsId=selectElement.value.split("&")[1];
+              }
+              await setUrls();
+            })
+            
+          }
+          async function setUrls(){
+            openTransactionUrl = 
+              "https://" + 
+              tabUrl +
+              "/commerce/transaction/" + 
+              destinationCommerceProcess +
+              "/" + bsId; //quote URL
+
+            openTransactionElement.href  = openTransactionUrl;//quote Url
+            openTransactionElement.target ="_blank"; // opening the quote in New tab 
+            openTransactionElement.style.backgroundColor = "#4fafc4"; // changing the background color after getting the url
+            let commerceDocumentDataForProcessIdUrl = 
+                "https://" +
+                tabUrl +
+                "/rest/v14/commerceProcesses/"+ 
+                destinationCommerceProcess +
+                  "/documents" ; // commerce document metadata url
+
+            let commerceDocumentMetaData = await fetch(commerceDocumentDataForProcessIdUrl , options);  //api call to get commerce document metadata
+            let documentMetadataResponse = await commerceDocumentMetaData.json();
+            processId = documentMetadataResponse.items[0].process.id; // getting process ID from the CommerceDocument Metadata
+            let xslurl = 
+                "https://" +
+                tabUrl +
+                "/admin/commerce/views/list_xslt.jsp?process_id=" +
+                processId ;  // xml document URL
+
+            openXml(xslurl,tabUrl);
+          }
           const doNetworkCall = async (tabUrl) => { //fetch Rest api Call
           let options={
             "method":"GET"
@@ -66,9 +103,7 @@ function getData(){
             for (let i = 0; i<loaderElement.length; i++){ //hiding loader element
               loaderElement[i].style.display = "none";
             }
-            
             alert("Please Login With Your Credentials");
-
           }
           else{
             const jsonData = await response.json(); //store Metadata as json 
@@ -78,7 +113,7 @@ function getData(){
                 allCommerceProcces.push(eachProcessData.name);
               }
             }
-            console.log(allCommerceProcces);
+            //console.log(allCommerceProcces);
             let destinationCommerceProcess = ""; // Destinated commerce process that user Entered Transaction Id Presents
             let commerceProcessArray=[];
             for (let eachProcessName of allCommerceProcces){  //cheking The TransactionId in each Commerce Process
@@ -88,31 +123,19 @@ function getData(){
                   '/rest/v14/' +
                     eachProcessName+'?q={transactionID_t:\'' + transactionId.value + '\'}';   // url for getting each transaction Data
                     //console.log(processTransactionDataUrl);
+              
               const transactionResponse = await fetch(processTransactionDataUrl, options);
               const transactionResponseData = await transactionResponse.json();
-              console.log(transactionResponseData);
-              if (transactionResponse.status === 200){
+              //console.log(transactionResponseData);
+              if (transactionResponse.ok){
                 if (transactionResponseData.items.length ===1){
                 let newObj=[];
                 newObj.push(transactionResponseData.items[0]._process_var_name);
                 newObj.push(transactionResponseData.items[0]._id);
                 commerceProcessArray.push(newObj);
-                
                 }
               }
-              
             }
-            async function getCommerceProcess(){
-              selectElement.addEventListener("change",async function(){
-                if (selectElement.value !== ""){
-                  destinationCommerceProcess=selectElement.value.split("&")[0];
-                  bsId=selectElement.value.split("&")[1];
-                }
-                await setUrls();
-              })
-              
-            }
-
             if (commerceProcessArray.length==1){
               destinationCommerceProcess=commerceProcessArray[0][0];
               bsId = commerceProcessArray[0][1];
@@ -128,38 +151,8 @@ function getData(){
                 }
               }
             }
-            async function setUrls(){
-              openTransactionUrl = 
-                "https://" + 
-                tabUrl +
-                "/commerce/transaction/" + 
-                destinationCommerceProcess +
-                "/" + bsId; //quote URL
-
-              openTransactionElement.href  = openTransactionUrl;//quote Url
-              openTransactionElement.target ="_blank"; // opening the quote in New tab 
-              openTransactionElement.style.backgroundColor = "#4fafc4"; // changing the background color after getting the url
-              let commerceDocumentDataForProcessIdUrl = 
-                  "https://" +
-                  tabUrl +
-                  "/rest/v14/commerceProcesses/"+ 
-                  destinationCommerceProcess +
-                    "/documents" ; // commerce document metadata url
-
-              let commerceDocumentMetaData = await fetch(commerceDocumentDataForProcessIdUrl , options);  //api call to get commerce document metadata
-              let documentMetadataResponse = await commerceDocumentMetaData.json();
-              processId = documentMetadataResponse.items[0].process.id; // getting process ID from the CommerceDocument Metadata
-              let xslurl = 
-                  "https://" +
-                  tabUrl +
-                  "/admin/commerce/views/list_xslt.jsp?process_id=" +
-                  processId ;  // xml document URL
-
-              openXml(xslurl,tabUrl);
-            }
-            
-            console.log(commerceProcessArray);
-            console.log(destinationCommerceProcess);
+            //console.log(commerceProcessArray);
+            //console.log(destinationCommerceProcess);
             if (destinationCommerceProcess === "" & commerceProcessArray.length === 0){ //if the quote Id is Incorrect(it didn't present in any commerce transaction)
               divloaderElement.style.height="0px";
               for (let i = 0; i<loaderElement.length; i++){ //hiding loader element
@@ -189,7 +182,7 @@ function getData(){
           }
           alert("This Extension Doesn't Run In this Tab");
         }
-        })  
+      })  
 }
 
 getQuoteDataButton.addEventListener("click",function(){
@@ -199,9 +192,10 @@ getQuoteDataButton.addEventListener("click",function(){
       loaderElement[i].style.display = "block";
     }
     getData();
-    }else{
-      alert("Enter Quote Number");
-    }
+  }
+  else{
+    alert("Enter quote Number");
+  }
 })
 
 
