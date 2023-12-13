@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8"/>
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <link rel="stylesheet" href="popup.css">
+            <title>CPQ Transaction Viewer</title>  
+        </head>
+        <body>
+            <div id="main-doc">
+                <h3 class="title">CPQ Transaction Viewer</h1>
+                <div class="input-container">
+                    <input type="text" placeholder="Enter Transaction ID" id="input-text" />
+                    <img src="https://cdn3.iconfinder.com/data/icons/feather-5/24/search-512.png" id="get-quote-data" alt="search"/>
+                </div>
+                <select id="selectProcess">
+                    <option value=""></option>
+                </select>
+                <!-- <div id="loader"></div> -->
+                <div id="loader"> 
+                    <span></span> 
+                    <span></span> 
+                    <span></span> 
+                    <span></span> 
+                    <span></span> 
+                    <span></span> 
+                </div> 
+                <div id="button-container">
+                    <a id="open-transaction">Open Quote</a>
+                    <a id="view-xml">View XML</a>
+                </div>
+            </div>
+            <script src="script.js"></script>
+        </body>
+    </html>
+       
