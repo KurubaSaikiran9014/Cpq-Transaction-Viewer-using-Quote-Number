@@ -54,45 +54,6 @@ function getData(){
               console.error("Problem fetching XSL ID: ", error);
             });
           }
-          async function getCommerceProcess(){
-            selectElement.addEventListener("change",async function(){
-              if (selectElement.value !== ""){
-                destinationCommerceProcess=selectElement.value.split("&")[0];
-                bsId=selectElement.value.split("&")[1];
-              }
-              await setUrls();
-            })
-            
-          }
-          async function setUrls(){
-            openTransactionUrl = 
-              "https://" + 
-              tabUrl +
-              "/commerce/transaction/" + 
-              destinationCommerceProcess +
-              "/" + bsId; //quote URL
-
-            openTransactionElement.href  = openTransactionUrl;//quote Url
-            openTransactionElement.target ="_blank"; // opening the quote in New tab 
-            openTransactionElement.style.backgroundColor = "#4fafc4"; // changing the background color after getting the url
-            let commerceDocumentDataForProcessIdUrl = 
-                "https://" +
-                tabUrl +
-                "/rest/v14/commerceProcesses/"+ 
-                destinationCommerceProcess +
-                  "/documents" ; // commerce document metadata url
-
-            let commerceDocumentMetaData = await fetch(commerceDocumentDataForProcessIdUrl , options);  //api call to get commerce document metadata
-            let documentMetadataResponse = await commerceDocumentMetaData.json();
-            processId = documentMetadataResponse.items[0].process.id; // getting process ID from the CommerceDocument Metadata
-            let xslurl = 
-                "https://" +
-                tabUrl +
-                "/admin/commerce/views/list_xslt.jsp?process_id=" +
-                processId ;  // xml document URL
-
-            openXml(xslurl,tabUrl);
-          }
           const doNetworkCall = async (tabUrl) => { //fetch Rest api Call
           let options={
             "method":"GET"
@@ -112,6 +73,45 @@ function getData(){
               if (eachProcessData.name.includes("commerceDocuments")){ //filtering Only Commerce Processes
                 allCommerceProcces.push(eachProcessData.name);
               }
+            }
+            async function getCommerceProcess(){
+              selectElement.addEventListener("change",async function(){
+                if (selectElement.value !== ""){
+                  destinationCommerceProcess=selectElement.value.split("&")[0];
+                  bsId=selectElement.value.split("&")[1];
+                }
+                await setUrls();
+              })
+              
+            }
+            async function setUrls(){
+              openTransactionUrl = 
+                "https://" + 
+                tabUrl +
+                "/commerce/transaction/" + 
+                destinationCommerceProcess +
+                "/" + bsId; //quote URL
+  
+              openTransactionElement.href  = openTransactionUrl;//quote Url
+              openTransactionElement.target ="_blank"; // opening the quote in New tab 
+              openTransactionElement.style.backgroundColor = "#4fafc4"; // changing the background color after getting the url
+              let commerceDocumentDataForProcessIdUrl = 
+                  "https://" +
+                  tabUrl +
+                  "/rest/v14/commerceProcesses/"+ 
+                  destinationCommerceProcess +
+                    "/documents" ; // commerce document metadata url
+  
+              let commerceDocumentMetaData = await fetch(commerceDocumentDataForProcessIdUrl , options);  //api call to get commerce document metadata
+              let documentMetadataResponse = await commerceDocumentMetaData.json();
+              processId = documentMetadataResponse.items[0].process.id; // getting process ID from the CommerceDocument Metadata
+              let xslurl = 
+                  "https://" +
+                  tabUrl +
+                  "/admin/commerce/views/list_xslt.jsp?process_id=" +
+                  processId ;  // xml document URL
+  
+              openXml(xslurl,tabUrl);
             }
             //console.log(allCommerceProcces);
             let destinationCommerceProcess = ""; // Destinated commerce process that user Entered Transaction Id Presents
@@ -165,7 +165,7 @@ function getData(){
               await getCommerceProcess();
             }
             else{
-              await setUrls();
+              await setUrls(destinationCommerceProcess,bsId);
             }
 
               // searching for XML  
